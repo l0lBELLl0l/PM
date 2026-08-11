@@ -1,0 +1,39 @@
+import { NavigationContainer } from "@react-navigation/native";
+import home from "./fonte/telas/home";
+import sobre from "./fonte/telas/sobre";
+import login from "./fonte/telas/login";
+import flex from "./fonte/telas/flex";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+const stack = createNativeStackNavigator();
+
+export default function App(){
+  return(<NavigationContainer>
+    <stack.Navigator>
+      <stack.Screen name="home" component={home}/>
+      <stack.Screen name="login" component={login}/>
+      <stack.Screen name="flex" component={flex}/>
+      <stack.Screen name="sobre" component={sobre}/>
+    </stack.Navigator>
+  </NavigationContainer>
+  
+)
+}
+
+..............................
+
+import { View, Text, Button } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+
+export default function home(){
+    const nav = useNavigation();
+
+    return(
+        <View>
+            <Text>Bem-vindo</Text>
+            <Button title="Sobre nos" onPress={() => nav.navigate('sobre')}/>
+        </View>
+    )
+}
+
+............................
+
