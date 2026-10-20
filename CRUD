@@ -1,0 +1,59 @@
+supabase.js
+  import { createClient } from '@supabase/supabase-js'; 
+const supabaseUrl = 'https://cizirkgztfzotfikosre.supabase.co'; // Substituir pelo endereço do seu banco de dados do Supabase 
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpemlya2d6dGZ6b3RmaWtvc3JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0MTc4NjEsImV4cCI6MjEwNzk5Mzg2MX0.I6J3e_bbl5HiXNtcDKJugEFDr9L2RnLGGtC_PcShkb8';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey); 
+// Diferente do export default, para usar em outro arquivo, você é obrigado a usar chaves {} e o nome exato da variável. 
+
+App.js
+  import { NavigationContainer } from "@react-navigation/native"; 
+import Ver from "./fonte/telas/ver.js"; 
+import Criar from "./fonte/telas/criar.js"; 
+import { createNativeStackNavigator} from "@react-navigation/native-stack";
+
+const Stack = createNativeStackNavigator();
+
+export default function App() { 
+return ( 
+<NavigationContainer> 
+<Stack.Navigator> 
+<Stack.Screen name="Clientes" component={Ver} options={{ headerShown: false }} /> 
+<Stack.Screen name="Cadastro" component={Criar} options={{ title: 'Cadastrar Cliente', headerStyle: { backgroundColor: '#3355aa' }, headerTintColor: '#fff' }} /> 
+</Stack.Navigator> 
+</NavigationContainer> 
+);
+} 
+
+criar.js
+  import { Text, View} from 'react-native'; 
+export default function Criar() { 
+return ( 
+<View> 
+<Text>Criar</Text> 
+</View> 
+);
+} 
+
+ver.js
+  import { Text, View} from 'react-native'; 
+import { supabase } from '../supabase'; 
+// Teste fora do componente (executa uma única vez quando o ficheiro é carregado na app) async function testarConexao() { 
+const { data, error } = await supabase.from('Clientes').select('*'); 
+if (error) { 
+console.log('Erro ao buscar clientes:', error); 
+} else {
+console.log('Resposta do Supabase (Tabela Clientes):', data); 
+}
+
+testarConexao();// Dispara o teste na inicialização 
+
+export default function Ver() { 
+return ( 
+<View> 
+<Text>Ver</Text> 
+</View> 
+); 
+}
+
+
