@@ -7,53 +7,189 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Diferente do export default, para usar em outro arquivo, você é obrigado a usar chaves {} e o nome exato da variável. 
 
 App.js
-  import { NavigationContainer } from "@react-navigation/native"; 
-import Ver from "./fonte/telas/ver.js"; 
-import Criar from "./fonte/telas/criar.js"; 
-import { createNativeStackNavigator} from "@react-navigation/native-stack";
+ 
+import React, { useEffect, useState } from 'react';
+import { Text, View, FlatList, Button } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { supabase } from './fonte/supabase.js';
+import Cadastro from './fonte/Cadastro.js';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() { 
-return ( 
-<NavigationContainer> 
-<Stack.Navigator> 
-<Stack.Screen name="Clientes" component={Ver} options={{ headerShown: false }} /> 
-<Stack.Screen name="Cadastro" component={Criar} options={{ title: 'Cadastrar Cliente', headerStyle: { backgroundColor: '#3355aa' }, headerTintColor: '#fff' }} /> 
-</Stack.Navigator> 
-</NavigationContainer> 
-);
-} 
+function Ver() {
+  const nav = useNavigation();
+  const [clientes, setClientes] = useState([]);
 
-criar.js
-  import { Text, View} from 'react-native'; 
-export default function Criar() { 
-return ( 
-<View> 
-<Text>Criar</Text> 
-</View> 
-);
-} 
+  useEffect(() => {
+    const buscarDados = async () => {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('*');
 
-ver.js
-  import { Text, View} from 'react-native'; 
-import { supabase } from '../supabase'; 
-// Teste fora do componente (executa uma única vez quando o ficheiro é carregado na app) async function testarConexao() { 
-const { data, error } = await supabase.from('Clientes').select('*'); 
-if (error) { 
-console.log('Erro ao buscar clientes:', error); 
-} else {
-console.log('Resposta do Supabase (Tabela Clientes):', data); 
+      if (error) {
+        console.error('Erro ao buscar clientes:', error);
+        return;
+      }
+
+      setClientes(data ?? []);
+    };
+
+    buscarDados();
+  }, []);
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ fontSize: 22, fontWeight: 'bold', marginRight: 10 }}>
+          Clientes
+        </Text>
+
+        <Button
+          title="Novo Cliente"
+          onPress={() => nav.navigate('Cadastro')}
+        />
+      </View>
+
+      <FlatList
+        data={clientes}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              padding: 20,
+              borderBottomWidth: 1,
+              borderColor: '#eee',
+            }}
+          >
+            <Text style={{ fontSize: 18 }}>{item.nome}</Text>
+            <Text>E-mail: {item.email}</Text>
+          </View>
+        )}
+      />
+    </SafeAreaView>
+  );
 }
 
-testarConexao();// Dispara o teste na inicialização 
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Ver"
+            component={Ver}
+            options={{ title: 'Clientes' }}
+          />
+          <Stack.Screen
+            name="Cadastro"
+            component={Cadastro}
+            options={{ title: 'Novo Cliente' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
+}
 
-export default function Ver() { 
-return ( 
-<View> 
-<Text>Ver</Text> 
-</View> 
-); 
+
+cadastro.js
+  
+import React from 'react';
+import { View, Text } from 'react-native';
+
+export default function Cadastro() {
+  return (
+    <View style={{ flex: 1, padding: 20 }}>
+      <Text style={{ fontSize: 22 }}>Cadastro de Cliente</Text>
+    </View>
+  );
+}
+
+
+ver.js
+import React from 'react';
+
+import { Text, View, FlatList, Button } from 'react-native';
+
+import {
+  SafeAreaProvider,
+  SafeAreaView
+} from 'react-native-safe-area-context';
+
+import { useNavigation } from '@react-navigation/native';
+
+export default function Ver() {
+  const nav = useNavigation();
+
+  const clientes = []; // Array vazio temporário para testar o layout visual
+
+    const buscarDados = async () => {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('*');
+
+      if (!error) setClientes(data);
+    };
+
+    buscarDados();
+
+
+  return (
+    // 2. O Provider deve abraçar a aplicação para calcular os espaços
+    <SafeAreaProvider>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            flexDirection: 'row'
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: 'bold',
+              marginRight: 10
+            }}
+          >
+        
+          </Text>
+
+          <Button
+            title="Novo Cliente"
+            onPress={() => nav.navigate('Cadastro')}
+          />
+        </View>
+
+        <FlatList
+          data={clientes}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                padding: 20,
+                borderBottomWidth: 1,
+                borderColor: '#eee'
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>
+                {item.nome}
+              </Text>
+            </View>
+          )}
+        />
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
 }
 
 
