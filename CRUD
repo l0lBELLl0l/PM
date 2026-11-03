@@ -1,3 +1,15 @@
+bibliotecas
+npx create-expo-app@ latest crud --template blank
+npx expo install react-dom react-native-web
+npx expo install @react-navigation/native
+npx expo install react-native-screens
+npx expo install react-native-safe-area-context
+npx expo install @react-navigation/native-stack
+npx expo install react-native-gesture-handler
+npx expo install @react-native-masked-view/masked-view
+npm install @supabase/supabase-js
+
+
 supabase.js
   import { createClient } from '@supabase/supabase-js'; 
 const supabaseUrl = 'https://cizirkgztfzotfikosre.supabase.co'; // Substituir pelo endereço do seu banco de dados do Supabase 
