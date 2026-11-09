@@ -26,7 +26,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { supabase } from './fonte/supabase.js';
-import Cadastro from './fonte/Cadastro.js';
+import Cadastro from './fonte/telas/Cadastro.js'
 
 const Stack = createNativeStackNavigator();
 
@@ -115,26 +115,75 @@ export default function App() {
 
 cadastro.js
   
-import { Text, Button, StyleSheet, TextInput } from 'react-native';
+
+import React, { useState } from 'react';
+import { Text, Button, StyleSheet, TextInput, Alert } from 'react-native';
+import { supabase } from '../supabase.js';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Cadastro() {
+  const nav = useNavigation();
+
+  // Estados para nome e e-mail
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+
+  // Função para salvar novo cliente
+  async function salvar() {
+
+    // Validação simples: não permite campos vazios
+    if (nome === '' || email === '') {
+      Alert.alert('Atenção', 'Preencha nome e e-mail.');
+      return;
+    }
+
+    // Inserindo os dados no banco de dados
+    const { error } = await supabase
+      .from('clientes')
+      .insert([{ nome: nome, email: email }]);
+
+    if (!error) {
+      setNome('');
+      setEmail('');
+
+      // Volta para a tela anterior
+      nav.goBack();
+
+    } else {
+      Alert.alert('Erro ao salvar: ' + error.message);
+    }
+  }
+
   return (
     <SafeAreaProvider style={styles.container}>
       <SafeAreaView style={styles.body}>
+
         <Text style={styles.label}>Nome:</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Digite o nome"
+          value={nome}
+          onChangeText={setNome}
         />
 
         <Text style={styles.label}>E-mail:</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Digite o e-mail"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
 
-        <Button title="Cadastrar" />
+        <Button
+          title="Cadastrar"
+          onPress={salvar}
+        />
+
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -146,15 +195,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     paddingTop: 50,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
 
   body: {
     flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
 
   input: {
@@ -163,66 +211,60 @@ const styles = StyleSheet.create({
     width: '80%',
     padding: 12,
     marginBottom: 15,
-    borderRadius: 5,
+    borderRadius: 5
   },
 
   label: {
     textAlign: 'left',
     width: '78%',
-    paddingBottom: 3,
-  },
+    paddingBottom: 3
+  }
 });
 
 
+
 ver.js
-import React from 'react';
 
+import React, { useEffect, useState } from 'react';
 import { Text, View, FlatList, Button } from 'react-native';
-
-import {
-  SafeAreaProvider,
-  SafeAreaView
-} from 'react-native-safe-area-context';
-
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '../supabase';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Ver() {
   const nav = useNavigation();
+  const [clientes, setClientes] = useState([]);
 
-  const clientes = []; // Array vazio temporário para testar o layout visual
-
+  useEffect(() => {
     const buscarDados = async () => {
-      const { data, error } = await supabase
-        .from('clientes')
-        .select('*');
-
+      const { data, error } = await supabase.from('Clientes').select('*');
       if (!error) setClientes(data);
     };
 
+    // Aqui você usa 'nav'
+    const unsubscribe = nav.addListener('focus', () => {
+      // listener para atualizar ao ganhar foco (voltar para a tela)
+      buscarDados();
+    });
+
     buscarDados();
 
+    return unsubscribe; // evitar vazamentos de memória (memory leaks), removendo o ouvinte quando a tela for destruída de vez.
+  }, [nav]); // [nav] Executa na montagem e sempre que o objeto de navegação for alterado
 
   return (
-    // 2. O Provider deve abraçar a aplicação para calcular os espaços
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1 }}>
         <View
           style={{
             paddingHorizontal: 20,
             paddingVertical: 10,
-            flexDirection: 'row'
+            flexDirection: 'row',
           }}
         >
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: 'bold',
-              marginRight: 10
-            }}
-          >
-        
+          <Text style={{ fontSize: 22, fontWeight: 'bold', marginRight: 10 }}>
+            Clientes
           </Text>
-
           <Button
             title="Novo Cliente"
             onPress={() => nav.navigate('Cadastro')}
@@ -237,12 +279,11 @@ export default function Ver() {
               style={{
                 padding: 20,
                 borderBottomWidth: 1,
-                borderColor: '#eee'
+                borderColor: '#eee',
               }}
             >
-              <Text style={{ fontSize: 18 }}>
-                {item.nome}
-              </Text>
+              <Text style={{ fontSize: 18 }}>{item.nome}</Text>
+              <Text>E-mail: {item.email}</Text>
             </View>
           )}
         />
@@ -250,5 +291,3 @@ export default function Ver() {
     </SafeAreaProvider>
   );
 }
-
-
