@@ -115,16 +115,63 @@ export default function App() {
 
 cadastro.js
   
-import React from 'react';
-import { View, Text } from 'react-native';
+import { Text, Button, StyleSheet, TextInput } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Cadastro() {
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 22 }}>Cadastro de Cliente</Text>
-    </View>
+    <SafeAreaProvider style={styles.container}>
+      <SafeAreaView style={styles.body}>
+        <Text style={styles.label}>Nome:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite o nome"
+        />
+
+        <Text style={styles.label}>E-mail:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite o e-mail"
+        />
+
+        <Button title="Cadastrar" />
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    paddingTop: 50,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+
+  body: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    width: '80%',
+    padding: 12,
+    marginBottom: 15,
+    borderRadius: 5,
+  },
+
+  label: {
+    textAlign: 'left',
+    width: '78%',
+    paddingBottom: 3,
+  },
+});
 
 
 ver.js
